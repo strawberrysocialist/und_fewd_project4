@@ -1,0 +1,8 @@
+# Node-specific files
+node_modules
+
+#Temp dev files
+validation*.json
+
+# OS-specific files
+.DS_Store
