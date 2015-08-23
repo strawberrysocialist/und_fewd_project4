@@ -82,7 +82,7 @@ module.exports = function(grunt) {
         files: [
           {
             expand: true,
-            src: ['*.htm*'],
+            src: ['*.htm?'],
           }
         ],
         options: {
