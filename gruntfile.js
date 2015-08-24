@@ -1,3 +1,6 @@
+//'use strict'
+var ngrok = require('ngrok');
+
 module.exports = function(grunt) {
   require('load-grunt-tasks')(grunt);
   require('time-grunt')(grunt);
@@ -322,8 +325,47 @@ module.exports = function(grunt) {
         fourth: ['concat'],
         fifth: ['compress'],
         limit: 4
-    } //concurrent
+    }, //concurrent
+
+    pagespeed: {
+      options: {
+        nokey: true,
+        //key: "AIzaSyCvyPbDgiwlkstAuV144PuJAphCos5tgh4"
+        locale: "en_US",
+        url: "https://developers.google.com"
+      },
+      local: {
+        options: {
+          url: "https://developers.google.com/speed/docs/insights/v1/getting_started",
+          strategy: "desktop",
+          threshold: 90
+        }
+      },
+      mobile: {
+        options: {
+          paths: ["/speed/docs/insights/v1/getting_started", "/speed/docs/about"],
+          strategy: "mobile",
+          threshold: 90
+        }
+      }
+    } //pagespeed
   }); //initConfig
+
+  // Register customer task for ngrok
+  grunt.registerTask('psi-ngrok', 'Run pagespeed with ngrok', function() {
+    var done = this.async();
+    var port = 9292;
+
+    ngrok.connect(port, function(err, url) {
+      if (err !== null) {
+        grunt.fail.fatal(err);
+        return done();
+      }
+      grunt.config.set('pagespeed.options.url', url);
+      grunt.task.run('pagespeed');
+      done();
+    });
+  });
 
   grunt.registerTask('default', 'watch:src');
   grunt.registerTask('build', 'newer:concurrent');
@@ -331,4 +373,5 @@ module.exports = function(grunt) {
   grunt.registerTask('css', ['newer:postcss:build', 'newer:concat:css', 'compress:css']);
   grunt.registerTask('js', ['newer:jshint:build', 'newer:jsbeautifier:build', 'newer:uglify:build', 'newer:concat:js', 'compress:js']);
   grunt.registerTask('img', ['newer:imagemin:build']);
+  grunt.registerTask('psi', ['psi-ngrok']);
 }; //exports
